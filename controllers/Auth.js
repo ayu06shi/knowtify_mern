@@ -196,7 +196,7 @@ exports.login = async(req, res) => {
         if(await bcrypt.compare(password, user.password)) {
             const payLoad = {
                 email: user.email,
-                id: user._id,
+                id: user._id, //this payload contains user._id 
                 accountType: user.accountType,
             }
 

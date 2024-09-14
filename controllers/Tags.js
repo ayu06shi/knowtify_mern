@@ -15,7 +15,7 @@ exports.createTag = async(req, res)=> {
         }
         //create entry in DB
         const tagdetails=await Tag.create({
-            name:name,
+            name:name,  
             description:description,
         });
         console.log(tagDetails);

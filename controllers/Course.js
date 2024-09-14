@@ -68,7 +68,7 @@ exports.createCourse= async(req,res)=>{
             { new: true }
         );
 
-        //update the Tag ka schema
+        //update the Tag schema
         await Tag.findByIdAndUpdate(
             { _id: tagDetails._id },
             {
@@ -107,7 +107,7 @@ exports.showAllCourses = async(req,res)=>{
                                                 instructor:true,
                                                 ratingAndReview:true,
                                                 studentEnrolled:true,})
-                                                populate("instructor")
+                                                .populate("instructor")
                                                 .exec();
         return res.status(200).json({
             success:true,
@@ -124,3 +124,7 @@ exports.showAllCourses = async(req,res)=>{
         })
     }
 }
+
+
+// get course details
+
