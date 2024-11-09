@@ -11,7 +11,7 @@ exports.updateProfile = async(req, res) => {
 
         //data validation
         if(!contactNumber || !gender || !id) {
-            return res.status(400).jso({
+            return res.status(400).json({
                 success: false,
                 message: "All fields are required",
             })

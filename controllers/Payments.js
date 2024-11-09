@@ -110,7 +110,7 @@ exports.verifySignature = async(req, res) => {
 
         // after authorizing payment, enroll strudent to that course
 
-        // to get courseId, we need notes:- req.body.payload.payment.entity.notes
+        // to get courseId, we need notes: req.body.payload.payment.entity.notes
         const {courseId, userId} = req.body.payload.payment.entity.notes;
 
         try {
