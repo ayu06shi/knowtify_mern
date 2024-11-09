@@ -3,6 +3,7 @@ const OTP = require("../models/OTP");
 const otpGenerator = require("otp-generator");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
+const Profile = require("../models/Profile");
 require("dotenv").config();
 
 // send OTP
@@ -69,6 +70,7 @@ exports.sendOTP = async(req, res) => {
 exports.signUp = async(req, res) => {
 
     try {
+
         // data fetch from req body
         const {
             firstName,
@@ -80,6 +82,8 @@ exports.signUp = async(req, res) => {
             contactNumber,
             otp,
         } = req.body;
+
+        console.log("Otp: ", otp)
 
         // validate data
         if(!firstName || !lastName || !email || !password || !confirmPassword || !otp){
@@ -97,40 +101,46 @@ exports.signUp = async(req, res) => {
             });
         }
 
+
         // check if user already exists
         const existingUser = await User.findOne({email});
 
         if(existingUser) {
             return res.status(400).json({
                 success: false,
-                message: "User is already registered",
+                message: "User already exists. Please sign in to continue.",
             });
         }
 
-        // find most recent otp stored for the user
-        const recentOtp = await OTP.findOne({email}).sort({createAt: -1}).limit(1);
-        console.log(recentOtp);
-
-        // validate otp
-        if(recentOtp.length == 0) {
-            // OTP not found
-            return res.status(400).json({
-                success: false,
-                message: "OTP Not Found",
-            })
-        }
-        // check otp with recentOtp (match both)
-        else if(otp != recentOtp.otp){
-            // invalid otp
-            return res.status(400).json({
-                success: false,
-                message: "Invalid OTP",
-            });
-        }
+         // find most recent otp stored for the user
+         recentOtp = await OTP.findOne({email}).sort({createAt: -1}).limit(1);
+         console.log(recentOtp);
+ 
+         // validate otp
+         if(recentOtp.length == 0) {
+             // OTP not found
+             return res.status(400).json({
+                 success: false,
+                 message: "OTP Not Found",
+             })
+         }
+         // check otp with recentOtp (match both)
+         else if(otp != recentOtp.otp){
+             // invalid otp
+             return res.status(400).json({
+                 success: false,
+                 message: "Invalid OTP",
+             });
+         }
 
         // hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Create the user
+        let approved = ""
+        approved === "Instructor" ? (approved = false) : (approved = true)
+        
+        
         // create entry in DB
 
         // create profile
@@ -147,9 +157,10 @@ exports.signUp = async(req, res) => {
             email,
             contactNumber,
             password: hashedPassword,
-            accountType,
+            accountType: accountType,
+            approved: approved,
             additionalDetails: profileDetails._id,
-            image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstname} ${lastName}`,
+            image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName} ${lastName}`,
         })
 
         // return response
