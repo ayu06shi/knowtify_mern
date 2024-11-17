@@ -1,8 +1,8 @@
 const express = require("express");
 const app = express();
 
-const userRoutes = require("./routes/User");
-const profileRoutes = require("./routes/Profile");
+const userRoutes = require("./routes/user");
+const profileRoutes = require("./routes/profile");
 // const paymentRoutes = require("./routes/Payment");
 const courseRoutes = require("./routes/Course");
 const contactUsRoute = require("./routes/Contact");
@@ -30,12 +30,12 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors());	
 
-// app.use(
-// 	fileUpload({
-// 		useTempFiles:true,
-// 		tempFileDir:"/tmp",
-// 	})
-// )
+app.use(
+	fileUpload({
+		useTempFiles:true,
+		tempFileDir:"/tmp",
+	})
+)
 
 // cloudinary connection
 cloudinaryConnect();

@@ -1,4 +1,4 @@
-const Tag = require("../models/tags");
+const Tag = require("../models/Tags");
 
 //create Tag to handler function
 

@@ -175,6 +175,7 @@ exports.signUp = async(req, res) => {
         console.log(error);
         return res.status(500).json({
             success: false,
+            error: error.message,
             message: "User cannot be registered. Please try again!",
         })
     }
@@ -288,18 +289,19 @@ exports.changePassword = async(req, res) => {
 
         // send mail: password updated notification
         try {
-            const mailResponse = await mailSender(updatedUserDetails.email, 
-                                                    "Password for your account has been updated", 
-                                                    passwordUpdated(
-                                                        updatedUserDetails.email,
-                                                        `Password updated successfully for ${updatedUserDetails.firstName} ${updatedUserDetails.lastName}`
-                                                    )
-                                                );
+            const mailResponse = await mailSender(
+                updatedUserDetails.email, 
+                "Password for your account has been updated", 
+                passwordUpdated(
+                    updatedUserDetails.email,
+                    `Password updated successfully for ${updatedUserDetails.firstName} ${updatedUserDetails.lastName}`
+                )
+            );
             console.log("Password Updation mail sent successfully: ", mailResponse.response);
         } 
         catch (error) {
             console.log("Error occured while sending email: ", error.message);
-            // 500 is internal server error
+
             return res.status(500).json({
                 success: false,
                 message: "Error occurred while sending email",
@@ -310,7 +312,7 @@ exports.changePassword = async(req, res) => {
         // return response
         return res.status(200).json({
             success: true,
-            message: "Password changed successfully !",
+            message: "Password changed successfully!",
         })
 
     } catch (error) {
@@ -318,6 +320,7 @@ exports.changePassword = async(req, res) => {
         return res.status(500).json({
             success: false,
             message: "Failure in changing password",
+            error: error.message,
         })
     }
 }

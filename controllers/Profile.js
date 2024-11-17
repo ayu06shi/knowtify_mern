@@ -1,5 +1,6 @@
 const Profile = require('../models/Profile');
 const User = require('../models/User');
+const { uploadImageToCloudinary } = require('../utils/imageUploader');
 
 exports.updateProfile = async(req, res) => {
     try {
@@ -45,7 +46,6 @@ exports.updateProfile = async(req, res) => {
 }
 
 // deleteAccount
-
 exports.deleteAccount = async(req, res) => {
     try {
         //get id
@@ -93,7 +93,11 @@ exports.getAllUserDetails = async(req, res) => {
         const id = req.user.id;
 
         //validate id
-        const userDetails = await User.findById(id).populate("additionalDetails").exec();
+        const userDetails = await User.findById(id)
+            .populate("additionalDetails")
+            .exec();
+
+        console.log(userDetails)
 
         if(!userDetails) {
             return res.status(404).json({
@@ -105,7 +109,8 @@ exports.getAllUserDetails = async(req, res) => {
         //return response
         return res.status(200).json({
             success: true,
-            message: "User Data Fetched Successfully"
+            message: "User Data Fetched Successfully",
+            data: userDetails,
         })
 
 
@@ -114,6 +119,43 @@ exports.getAllUserDetails = async(req, res) => {
             success: false,
             message: error.message,
         })
+    }
+}
+
+exports.updateDisplayPicture = async (req, res) => {
+    try {
+        const displayPicture = req.files?.displayPicture;
+
+        if (!displayPicture) {
+            return res.status(400).json({ success: false, message: 'No file uploaded' });
+        }
+
+        const image = await uploadImageToCloudinary(
+            displayPicture,
+            process.env.FOLDER_NAME,
+            1000,
+            1000
+        )
+
+        console.log(image)
+
+        const userId = req.user.id;
+        const updatedProfile = await User.findByIdAndUpdate(
+            { _id: userId },
+            { image: image.secure_url },
+            { new: true }
+        )
+
+        res.send({
+            success: true,
+            message: `Image Uploaded successfully`,
+            data: updatedProfile,
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+          })
     }
 }
 
