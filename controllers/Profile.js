@@ -46,46 +46,42 @@ exports.updateProfile = async(req, res) => {
 
 // deleteAccount
 
-exports.deleteAccount = async(req, res) => {
+exports.deleteAccount = async (req, res) => {
     try {
-        //get id
-        const id = req.user.id;
-
-        //validate id
-        const userDetails = await User.findById(id);
-
-        if(!userDetails) {
-            return res.status(404).json({
-                success: false,
-                message: "User Not Found",
-            })
-        }
-
-        //delete profile
-        await Profile.findByIdAndDelete({
-            _id: userDetails.additionalDetails,
-        });
-
-        // to do: unenroll user from all enrolled courses
-
-        //delete user
-        await User.findByIdAndDelete({
-            _id: id,
+      const id = req.user.id
+      console.log(id)
+      const user = await User.findById({ _id: id })
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
         })
-
-        //return response
-        return res.status(200).json({
-            success: true,
-            message: "User Deleted Successfully"
-        })
+      }
+      // Delete Assosiated Profile with the User
+      await Profile.findByIdAndDelete({
+        _id: new mongoose.Types.ObjectId(user.additionalDetails),
+      })
+      for (const courseId of user.courses) {
+        await Course.findByIdAndUpdate(
+          courseId,
+          { $pull: { studentsEnroled: id } },
+          { new: true }
+        )
+      }
+      // Now Delete User
+      await User.findByIdAndDelete({ _id: id })
+      res.status(200).json({
+        success: true,
+        message: "User deleted successfully",
+      })
+      await CourseProgress.deleteMany({ userId: id })
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "User cannot be deleted",
-            error: error.message,
-        })
+      console.log(error)
+      res
+        .status(500)
+        .json({ success: false, message: "User Cannot be deleted successfully" })
     }
-}
+  }
 
 exports.getAllUserDetails = async(req, res) => {
     try {
