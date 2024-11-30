@@ -2,6 +2,12 @@ const Course = require("../models/Course");
 const Tag= require("../models/Tags");
 const User = require("../models/User");
 const {uploadImageToCloudinary} = require("../utils/imageUploader");
+// controllers/Course.js
+exports.getAllCourses = (req, res) => {
+    // Logic to fetch all courses
+    res.status(200).json({ success: true, data: [] });
+};
+
 
 //createCourse handler function
 
@@ -128,64 +134,57 @@ exports.showAllCourses = async(req,res)=>{
 
 
 // get course details
-exports.getCourseDetails = async (req, res) => {
+// controllers/Course.js
+
+exports.getCourseDetails = (req, res) => {
     try {
-        const { courseId } = req.body
-        const courseDetails = await Course.findOne({
-          _id: courseId,
-        })
-          .populate({
-            path: "instructor",
-            populate: {
-              path: "additionalDetails",
-            },
-          })
-          .populate("category")
-          .populate("ratingAndReviews")
-          .populate({
-            path: "courseContent",
-            populate: {
-              path: "subSection",
-              select: "-videoUrl",
-            },
-          })
-          .exec()
-    
-        if (!courseDetails) {
-          return res.status(400).json({
-            success: false,
-            message: `Could not find course with id: ${courseId}`,
-          })
-        }
-    
-        // if (courseDetails.status === "Draft") {
-        //   return res.status(403).json({
-        //     success: false,
-        //     message: `Accessing a draft course is forbidden`,
-        //   });
-        // }
-    
-        let totalDurationInSeconds = 0
-        courseDetails.courseContent.forEach((content) => {
-          content.subSection.forEach((subSection) => {
-            const timeDurationInSeconds = parseInt(subSection.timeDuration)
-            totalDurationInSeconds += timeDurationInSeconds
-          })
-        })
-    
-        const totalDuration = convertSecondsToDuration(totalDurationInSeconds)
-    
-        return res.status(200).json({
-          success: true,
-          data: {
-            courseDetails,
-            totalDuration,
-          },
-        })
-      } catch (error) {
-        return res.status(500).json({
-          success: false,
-          message: error.message,
-        })
+      const { courseId } = req.body;
+  
+      // Logic to fetch course details from the database
+      const course = {}; // Replace with database query
+      if (!course) {
+        return res.status(404).json({ success: false, message: "Course not found" });
       }
+  
+      res.status(200).json({ success: true, data: course });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Internal server error", error: error.message });
     }
+  };
+  exports.getFullCourseDetails = async (req, res) => {
+    try {
+      const { courseId } = req.body;
+  
+      // Validate the input
+      if (!courseId) {
+        return res.status(400).json({
+          success: false,
+          message: "Course ID is required",
+        });
+      }
+  
+      // Fetch course details from the database (mock example)
+      const course = {}; // Replace this with your actual database query logic
+  
+      if (!course) {
+        return res.status(404).json({
+          success: false,
+          message: "Course not found",
+        });
+      }
+  
+      // Send the response with course details
+      res.status(200).json({
+        success: true,
+        data: course,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+        error: error.message,
+      });
+    }
+  };
+  
